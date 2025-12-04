@@ -1,47 +1,59 @@
-import User from "../models/UserModel.ts"
-import { Request,Response,NextFunction } from "express"
+import User from "../models/UserModel.ts";
+import bcrypt from "bcryptjs";
+import { Request, Response, NextFunction } from "express";
+
 
 const UserController = {
+  createUser: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { username, email, password } = req.body;
 
-createUser :async (req: Request, res : Response, next: NextFunction) => {
-    try{
-      console.log(req.body)
-        const newUser = await User.create(req.body);
-        res.locals.newUser = newUser; 
-        return next()
+      const userCheck = await User.findOne({ username });
 
-    } catch(error: unknown){
-    return next(
-        {
-          log:`Something went wrong adding a new user`,
-          status: 500,
-          message:{ error : `An Issue Occured Creating Your Account.`}
-          
-        }
-       )
-    }
- 
-},
+      if (userCheck) {
+        alert("Username cannot be created.");
+        return res.status(400).json({ message: "Username cannot be created." });
+      }
 
-getAllUsers: async(req : Request, res: Response, next : NextFunction) => {
-    try{
-      const findAllUsers = await User.find();
+      const emailCheck = await User.findOne({ email });
+      if (emailCheck) {
+        return res.status(400).json({ message: "Email already registered." });
+      }
 
-     res.locals.allUsers = findAllUsers;
-      
-      return next()
-      
-    }catch(error : unknown){
-      return next(
-        {
-          log:`Something went wrong finding User`,
-          status: 500,
-          message:{ error :`Sorry, we cannot find those User.`}
-          
-        }
-      )
+      const passwordHashed = await bcrypt.hash(password, 10);
+
+      const newUser = await User.create({
+        username,
+        email,
+        password: passwordHashed,
+      });
+
+      res.locals.newUser = newUser;
+      return next();
+    } catch (error: unknown) {
+      return next({
+        log: `Something went wrong adding a new user`,
+        status: 500,
+        message: { error: `An Issue Occured Creating Your Account.` },
+      });
     }
   },
-}
+
+  getAllUsers: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const findAllUsers = await User.find();
+
+      res.locals.allUsers = findAllUsers;
+
+      return next();
+    } catch (error: unknown) {
+      return next({
+        log: `Something went wrong finding User`,
+        status: 500,
+        message: { error: `Sorry, we cannot find those User.` },
+      });
+    }
+  },
+};
 
 export default UserController;
