@@ -37,7 +37,7 @@ app.use("/User", UserRouter);
 
 // // Create a User in the database
 // http://localhost:3000/User
-UserRouter.post("/", UserController.createUser, (req : Request, res : Response)=> { return res.status(201).json(res.locals.newUser)});
+UserRouter.post("/", UserController.createUser, (req : Request, res : Response)=> {return res.status(201).json(res.locals.newUser)});
 
 
 // //attempt to get all users
