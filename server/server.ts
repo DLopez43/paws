@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Request, Response, NextFunction, Error} from "express"
 import dotenv from "dotenv"
 import cors from "cors"
-import UserController from "./controllers/UserController.ts";
+import UserController from "../server/controllers/UserController";
 
 dotenv.config();
 
@@ -13,9 +13,9 @@ const MONGODB_URI = process.env.MONGODB_URI as string;
 app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.get("/", (req, res) => {
-  res.send("API is up");
-});
+// app.get("/", (req, res) => {
+//   res.send("API is up");
+// });
 
 mongoose.connect(
   MONGODB_URI
@@ -32,29 +32,18 @@ mongoose.connect(
   });
 
 
-// const UserRouter = express.Router();
-// app.use("/", UserRouter);
+const UserRouter = express.Router();
+app.use("/User", UserRouter);
 
 // // Create a User in the database
-// // http://localhost:3000/User
-// UserRouter.post("/", UserController.createUser, (req : Request, res : Response)=> { return res.status(200).json(res.locals.newUser)});
+// http://localhost:3000/User
+UserRouter.post("/", UserController.createUser, (req : Request, res : Response)=> { return res.status(201).json(res.locals.newUser)});
 
-// // Get a User from the database
-// // http://localhost:3000/User/"name"
-// UserRouter.get("/:name", UserController.getUser, (req : Request, res : Response)=> { return res.status(200).json(res.locals.newUser)});
-
-// // Change a users name
-// // http://localhost:3000/User/"name"
-// UserRouter.patch("/:name", UserController.updateUser, (req : Request, res : Response)=> { return res.status(200).json(res.locals.newUser)});
-
-// // Delete a User from the database
-// // http://localhost:3000/User/"name"
-// UserRouter.delete("/:name", UserController.deleteUser, (req : Request, res : Response)=> { return res.status(200).json(res.locals.newUser)});
 
 // //attempt to get all users
-// UserRouter.get("/",UserController.getAllUsers, (req : Request, res : Response)=> { return res.status(200).json(res.locals.newUser)});
-// // Unknown route handler
-// app.use((req, res) => res.sendStatus(404));
+UserRouter.get("/",UserController.getAllUsers, (req : Request, res : Response)=> { return res.status(200).json(res.locals.allUsers)});
+// Unknown route handler
+app.use((req, res) => res.sendStatus(404));
 
 // Global error handler
 app.use((err: Error, req: Request, res : Response, next: NextFunction) => {
