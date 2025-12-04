@@ -1,19 +1,76 @@
-import React from "react";
+import { useState } from "react";
 
-type Props = {};
+const Signup = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
 
-const Signup = (props: Props) => {
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setError(null);
+    setSuccess(null);
+
+    // make sure all fields are input
+    if (!email || !username || !password) {
+      setError("Please complete all fields.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, email }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        setError(err.error || "Failed to create user.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Created user:", data);
+
+      setSuccess("Account created successfully!");
+      setUsername("");
+      setPassword("");
+      setEmail("");
+
+    } catch (error) {
+      console.error("Error creating user:", error);
+      setError("Something went wrong. Please try again.");
+    }
+  };
+
   return (
     <>
       <h1>Signup</h1>
-      <form action="">
-        <label htmlFor="email">Email:</label>
-        <input id ="email" type="text" placeholder="Enter Your Email" />
-        <label htmlFor="username">Username:</label>
-        <input id ="username" type="text" placeholder="Enter Your Username" />
-        <label htmlFor="password">Password:</label>
-        <input id ="password" type="text" placeholder="Enter Your Password" />
-        <input type="submit" name="" id="login" value="Login" />
+      <form onSubmit={handleSubmit}>
+        <input
+          placeholder="Enter Your Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          placeholder="Enter Your Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        <input
+          placeholder="Enter Your Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button type="submit">Sign Up</button>
       </form>
     </>
   );
